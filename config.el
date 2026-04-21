@@ -8,15 +8,74 @@
         treemacs-collapse-dirs 3))
 
 ;; Calendar holidays (shown in org-agenda via org-agenda-include-diary)
-(setq diary-file "~/org/diary")
+(setq diary-file "~/org/scheduling/diary")
 
 ;; Org
 (after! org
-  (setq org-agenda-files '("~/org/scheduling/tasks.org"))
-  (setq org-agenda-include-diary t)
-
   (setq org-startup-with-inline-images t
         org-image-actual-width 600)
+
+  (setq org-agenda-files '("~/org/scheduling/tasks.org"
+                           "~/org/scheduling/inbox.org"
+                           "~/org/scheduling/projects.org"
+                           "~/org/scheduling/calendar.org"))
+  (setq org-agenda-include-diary t)
+
+  ;; Keywords: action states | terminal states
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "NEXT(n)" "IN-PROGRESS(i!)" "WAIT(w@/!)" "|" "DONE(d!)" "CANCELLED(c@)")))
+
+  (setq org-todo-keyword-faces
+        '(("TODO"        . (:foreground "#a60000" :weight bold))
+          ("NEXT"        . (:foreground "#0031a9" :weight bold))
+          ("IN-PROGRESS" . (:foreground "#8f0075" :weight bold))
+          ("WAIT"        . (:foreground "#7a4f00" :weight bold))
+          ("DONE"        . (:foreground "#005f00"))
+          ("CANCELLED"   . (:foreground "#505050" :strike-through t))))
+
+(setq org-highest-priority ?A
+        org-lowest-priority  ?C
+        org-default-priority ?B)
+  (setq org-use-fast-todo-selection t)
+  (setq org-log-done 'time)
+  (setq org-log-into-drawer t)
+
+  (setq org-agenda-span 10 
+        org-agenda-start-on-weekday nil)
+  (setq org-agenda-sort-notime-is-late t)
+  (setq org-agenda-sorting-strategy
+        '((agenda priority-down scheduled-up deadline-up)
+          (todo   priority-down category-up)
+          (tags   priority-down category-up)))
+
+  ;; Custom agenda views
+  (setq org-agenda-custom-commands
+        '(("d" "Today" agenda ""
+           ((org-agenda-span 1)
+            (org-agenda-start-on-weekday nil)))
+          ("n" "Next actions" todo "NEXT"
+           ((org-agenda-sorting-strategy '(priority-down))))
+          ("w" "Waiting" todo "WAIT")
+          ("r" "Weekly review"
+           ((agenda "" ((org-agenda-span 7)))
+            (todo "NEXT")
+            (todo "WAIT")))))
+
+  (setq org-capture-templates
+        '(("i" "Inbox" entry
+           (file "~/org/scheduling/inbox.org")
+           "* %?\n")
+          ("t" "Todo" entry
+           (file+headline "~/org/scheduling/tasks.org" "Tasks")
+           "* TODO %?\n  SCHEDULED: %t\n")
+          ("n" "Next action" entry
+           (file+headline "~/org/scheduling/tasks.org" "Tasks")
+           "* NEXT [#B] %?\n")
+)))
+
+(map! :leader
+      :desc "Open inbox.org" "o i"
+      (cmd! (find-file "~/org/scheduling/inbox.org")))
 
 ;; Use LSP for Java formatting (via jdtls)
 (after! apheleia
