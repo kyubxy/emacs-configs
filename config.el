@@ -35,8 +35,8 @@
 
 (setq org-highest-priority ?A
         org-lowest-priority  ?C
-        org-default-priority ?B)
-  (setq org-use-fast-todo-selection t)
+        org-default-priority ?C)
+  (setq org-use-fast-todo-selection 't)
   (setq org-log-done 'time)
   (setq org-log-into-drawer t)
 
@@ -61,16 +61,19 @@
             (todo "NEXT")
             (todo "WAIT")))))
 
+  (map! :map org-agenda-mode-map
+        :n "t" #'org-agenda-todo)
+
   (setq org-capture-templates
         '(("i" "Inbox" entry
            (file "~/org/scheduling/inbox.org")
            "* %?\n")
           ("t" "Todo" entry
-           (file+headline "~/org/scheduling/tasks.org" "Tasks")
+           (file "~/org/scheduling/tasks.org")
            "* TODO %?\n  SCHEDULED: %t\n")
           ("n" "Next action" entry
-           (file+headline "~/org/scheduling/tasks.org" "Tasks")
-           "* NEXT [#B] %?\n")
+           (file "~/org/scheduling/tasks.org")
+           "* NEXT %?\n  SCHEDULED: %(org-insert-time-stamp (org-read-date nil t \"+1d\"))\n")
 )))
 
 (map! :leader
