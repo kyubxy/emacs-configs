@@ -12,8 +12,9 @@
 
 ;; Org
 (after! org
+  ;; Enable inline image previews with a smaller default size (300px)
   (setq org-startup-with-inline-images t
-        org-image-actual-width 600)
+        org-image-actual-width 300)
 
   (setq org-agenda-files '("~/org/scheduling/tasks.org"
                            "~/org/scheduling/inbox.org"
@@ -79,6 +80,8 @@
 (map! :leader
       :desc "Open inbox.org" "o i"
       (cmd! (find-file "~/org/scheduling/inbox.org")))
+
+(map! "C-s" #'save-buffer)
 
 ;; Use LSP for Java formatting (via jdtls)
 (after! apheleia
