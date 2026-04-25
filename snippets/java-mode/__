@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: Java class file template
+# key: __
+# --
+`(+java/package-declaration (buffer-file-name))`/**
+ * @author Justin Tieu, u7280302
+ */
+public class `(file-name-base (or (buffer-file-name) (buffer-name)))` {
+    $0
+}

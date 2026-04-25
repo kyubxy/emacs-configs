@@ -139,3 +139,45 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 
+
+;; ---------------------------------------------------------------------------
+;; Java helpers
+;; ---------------------------------------------------------------------------
+
+(defun +java/package-declaration (file-path)
+  "Return a Java package declaration derived from FILE-PATH.
+Searches for src/main/java or src/test/java to determine the package.
+Returns an empty string when the path cannot be resolved."
+  (if (not file-path)
+      ""
+    (let* ((file-path (expand-file-name file-path))
+           (match (string-match "/src/\\(?:main\\|test\\)/java/\\(.*\\)" file-path)))
+      (if match
+          (let* ((rel (match-string 1 file-path))
+                 (dir (file-name-directory rel)))
+            (if (and dir (not (string= dir "")))
+                (concat "package "
+                        (replace-regexp-in-string "/" "."
+                                                  (directory-file-name dir))
+                        ";\n\n")
+              ""))
+        ""))))
+
+;; Apply the __ snippet automatically to new, empty .java files.
+(after! file-templates
+  (set-file-template! "\\.java$" :trigger "__" :mode 'java-mode))
+
+(defun +java/new-class (class-name)
+  "Create a new Java source file for CLASS-NAME in the current directory.
+The file template will fill in the package declaration and class skeleton."
+  (interactive "sNew class name: ")
+  (find-file (expand-file-name (concat class-name ".java")
+                               (or (and (buffer-file-name)
+                                        (file-name-directory (buffer-file-name)))
+                                   default-directory))))
+
+;; Bind to <localleader> N  (SPC m N  or  , N  inside a Java buffer)
+(after! java-mode
+  (map! :map java-mode-map
+        :localleader
+        "N" #'+java/new-class))
